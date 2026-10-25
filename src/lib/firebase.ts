@@ -3,12 +3,12 @@ import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect } from
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC1MZDkmee4i0HRBJeFV5p6nHrMZ0nHMf4",
-  authDomain: "haru-memory-9f3a.firebaseapp.com",
-  projectId: "haru-memory-9f3a",
-  storageBucket: "haru-memory-9f3a.firebasestorage.app",
-  messagingSenderId: "144769745258",
-  appId: "1:144769745258:web:dbaa6aaa51f26571c8a513",
+  apiKey: "AIzaSyAmFmRWavFntsWD_Nqw4-WUVawZxb_VwW4",
+  authDomain: "project-96ef3536-5162-4778-830.firebaseapp.com",
+  projectId: "project-96ef3536-5162-4778-830",
+  storageBucket: "project-96ef3536-5162-4778-830.firebasestorage.app",
+  messagingSenderId: "857792059086",
+  appId: "1:857792059086:web:60f5f4bda26b99331a229f",
 };
 
 export const app = initializeApp(firebaseConfig);
@@ -28,6 +28,11 @@ export function authMessage(code: string) {
 export async function signInWithGoogle() {
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: "select_account" });
+  const phone = window.matchMedia("(max-width: 560px)").matches;
+  if (phone) {
+    await signInWithRedirect(auth, provider);
+    return;
+  }
   try {
     await signInWithPopup(auth, provider);
   } catch (error) {
