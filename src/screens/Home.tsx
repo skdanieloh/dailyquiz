@@ -65,7 +65,7 @@ export function Home({
       <header className="home-head">
         <div>
           <p className="eyebrow">매일 0시 오픈</p>
-          <h1>하루 작업기억</h1>
+          <h1>하루퀴즈</h1>
           <p className="hello">{name}님, 오늘도 한 단계만 올라가요.</p>
         </div>
         {photo ? <img className="avatar" src={photo} alt="" referrerPolicy="no-referrer" /> : <div className="avatar fallback">{name.slice(0, 1)}</div>}

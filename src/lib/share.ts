@@ -6,7 +6,7 @@ export function shareText(attempt: Attempt) {
     .map((stage, index) => `${index + 1}단계 ${stage.correct ? "성공" : "실패"} · ${stage.summary}`)
     .join("\n");
   return [
-    "하루 작업기억",
+    "하루퀴즈",
     koreanDate(attempt.date),
     "",
     `${attempt.subject} · ${attempt.title}`,
@@ -28,7 +28,7 @@ export async function shareSummary(attempt: Attempt) {
   const text = shareText(attempt);
   if (typeof navigator.share === "function") {
     try {
-      await navigator.share({ title: "하루 작업기억 결과", text });
+      await navigator.share({ title: "하루퀴즈 결과", text });
       return "shared" as const;
     } catch (error) {
       if ((error as { name?: string }).name === "AbortError") return "aborted" as const;
