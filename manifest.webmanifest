@@ -1,6 +1,6 @@
 {
-  "name": "하루퀴즈",
-  "short_name": "하루퀴즈",
+  "name": "dailyquiz",
+  "short_name": "dailyquiz",
   "description": "하루에 한 번 작업기억을 훈련하고, 결과지를 부모님께 공유하는 모바일 서비스",
   "start_url": "./",
   "scope": "./",
