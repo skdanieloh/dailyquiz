@@ -1,7 +1,9 @@
 node_modules
 dist
+dist-pages
 .DS_Store
 firebase-debug.log
+.firebase
 *.local
 .env
 .env.*

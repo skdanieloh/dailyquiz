@@ -2,11 +2,21 @@
   "firestore": {
     "rules": "firestore.rules"
   },
+  "hosting": {
+    "site": "harudailyquiz",
+    "public": "dist",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [{ "source": "**", "destination": "/index.html" }]
+  },
   "auth": {
     "providers": {
       "googleSignIn": {
         "oAuthBrandDisplayName": "dailyquiz",
-        "supportEmail": "uxidesigner@gmail.com"
+        "supportEmail": "uxidesigner@gmail.com",
+        "authorizedRedirectUris": [
+          "https://harudailyquiz.web.app/__/auth/handler",
+          "https://project-96ef3536-5162-4778-830.firebaseapp.com/__/auth/handler"
+        ]
       }
     }
   }

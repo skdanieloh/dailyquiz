@@ -27,7 +27,7 @@ export function Login({
         <span />
         <span />
       </div>
-      <h1>하루퀴즈</h1>
+      <h1>dailyquiz</h1>
       <p className="lead">하루에 한 번, 작업기억을 조금씩 키워요. 오늘의 카드는 0시에 열리고 자정에 닫혀요.</p>
       <ul className="points">
         <li>400일 과정이 하루씩 어려워져요.</li>

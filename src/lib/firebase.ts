@@ -4,7 +4,7 @@ import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAmFmRWavFntsWD_Nqw4-WUVawZxb_VwW4",
-  authDomain: "project-96ef3536-5162-4778-830.firebaseapp.com",
+  authDomain: "harudailyquiz.web.app",
   projectId: "project-96ef3536-5162-4778-830",
   storageBucket: "project-96ef3536-5162-4778-830.firebasestorage.app",
   messagingSenderId: "857792059086",
@@ -28,8 +28,8 @@ export function authMessage(code: string) {
 export async function signInWithGoogle() {
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: "select_account" });
-  const phone = window.matchMedia("(max-width: 560px)").matches;
-  if (phone) {
+  const sameSite = window.location.hostname === "harudailyquiz.web.app";
+  if (sameSite) {
     await signInWithRedirect(auth, provider);
     return;
   }

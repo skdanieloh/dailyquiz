@@ -6,6 +6,7 @@
     "curriculum": "node scripts/build-curriculum.mjs",
     "dev": "npm run curriculum && vite",
     "build": "npm run curriculum && tsc --noEmit && vite build",
+    "build:pages": "npm run curriculum && tsc --noEmit && vite build --mode pages --outDir dist-pages",
     "preview": "vite preview --host 127.0.0.1 --port 4173"
   },
   "dependencies": {
