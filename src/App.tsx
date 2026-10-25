@@ -37,6 +37,7 @@ export default function App() {
   const [preview, setPreview] = useState(() => import.meta.env.DEV && sessionStorage.getItem("dq-preview") === "1");
   const [user, setUser] = useState<User | null>(null);
   const [ready, setReady] = useState(preview);
+  const [redirectDone, setRedirectDone] = useState(preview);
   const [busy, setBusy] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [remote, setRemote] = useState<Record<string, Attempt>>({});
@@ -55,14 +56,27 @@ export default function App() {
   const toastTimer = useRef(0);
 
   useEffect(() => {
+    let active = true;
     const unsubscribe = onAuthStateChanged(auth, (next) => {
+      if (!active) return;
       setUser(next);
       setReady(true);
     });
-    getRedirectResult(auth).catch((error: { code?: string }) => {
-      setAuthError(authMessage(error.code ?? ""));
-    });
-    return unsubscribe;
+    getRedirectResult(auth)
+      .then((result) => {
+        if (!active) return;
+        if (result?.user) setUser(result.user);
+      })
+      .catch((error: { code?: string }) => {
+        if (active) setAuthError(authMessage(error.code ?? ""));
+      })
+      .finally(() => {
+        if (active) setRedirectDone(true);
+      });
+    return () => {
+      active = false;
+      unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
@@ -115,7 +129,7 @@ export default function App() {
   }
 
   if (!mobile) return <Gate />;
-  if (!ready) return <div className="center">불러오는 중</div>;
+  if (!ready || !redirectDone) return <div className="center">불러오는 중</div>;
 
   const person = preview
     ? { uid: "preview", name: "미리보기", photo: "" }

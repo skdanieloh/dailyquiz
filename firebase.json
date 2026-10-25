@@ -1,0 +1,13 @@
+{
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "auth": {
+    "providers": {
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "dailyquiz",
+        "supportEmail": "uxidesigner@gmail.com"
+      }
+    }
+  }
+}

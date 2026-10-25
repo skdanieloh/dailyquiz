@@ -3,12 +3,12 @@ import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect } from
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBT6HBkUtlteBliP1pnjcDl_skZjHEiv1c",
-  authDomain: "expedition-14546.firebaseapp.com",
-  projectId: "expedition-14546",
-  storageBucket: "expedition-14546.firebasestorage.app",
-  messagingSenderId: "134464708973",
-  appId: "1:134464708973:web:b2381bcded1b20ba167a64",
+  apiKey: "AIzaSyC1MZDkmee4i0HRBJeFV5p6nHrMZ0nHMf4",
+  authDomain: "haru-memory-9f3a.firebaseapp.com",
+  projectId: "haru-memory-9f3a",
+  storageBucket: "haru-memory-9f3a.firebasestorage.app",
+  messagingSenderId: "144769745258",
+  appId: "1:144769745258:web:dbaa6aaa51f26571c8a513",
 };
 
 export const app = initializeApp(firebaseConfig);
@@ -28,16 +28,11 @@ export function authMessage(code: string) {
 export async function signInWithGoogle() {
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: "select_account" });
-  const phone = window.matchMedia("(max-width: 560px)").matches;
-  if (phone) {
-    await signInWithRedirect(auth, provider);
-    return;
-  }
   try {
     await signInWithPopup(auth, provider);
   } catch (error) {
     const code = (error as { code?: string }).code ?? "";
-    if (code === "auth/popup-blocked") {
+    if (code === "auth/popup-blocked" || code === "auth/operation-not-supported-in-this-environment") {
       await signInWithRedirect(auth, provider);
       return;
     }
