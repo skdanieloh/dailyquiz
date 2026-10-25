@@ -13,24 +13,6 @@ for (const mission of curriculum.missions) {
   else last.items.push(mission);
 }
 
-function monthDay(iso: string) {
-  const parts = new Intl.DateTimeFormat("ko-KR", {
-    timeZone: "Asia/Seoul",
-    month: "numeric",
-    day: "numeric",
-  }).formatToParts(new Date(`${iso}T12:00:00+09:00`));
-  const pick = (type: Intl.DateTimeFormatPartTypes) => parts.find((part) => part.type === type)?.value ?? "";
-  return { month: Number(pick("month")), day: Number(pick("day")) };
-}
-
-function monthSpan(items: Mission[]) {
-  const first = monthDay(items[0].date);
-  const last = monthDay(items[items.length - 1].date);
-  const start = `${first.month}월 ${first.day}일`;
-  const end = first.month === last.month ? `${last.day}일` : `${last.month}월 ${last.day}일`;
-  return `${start}–${end}`;
-}
-
 export function Home({
   name,
   photo,
@@ -94,15 +76,15 @@ export function Home({
             <p className="quiet">{koreanDate(todayMission.date)}</p>
             <h2>{todayMission.title}</h2>
             <p className="lead">{todayMission.lead}</p>
-            <p className="meta">
-              난이도 {difficultyText(todayMission.difficulty)} · {todayMission.difficultyLabel}
-            </p>
             {todayAttempt ? (
               <>
                 <p className="money">{won(todayAttempt.reward)}</p>
-                <p className="meta">
-                  {todayAttempt.correctCount}/5단계 · {todayAttempt.subject}
-                </p>
+                <div className="hero-facts">
+                  <span>난이도 {difficultyText(todayMission.difficulty)} · {todayMission.difficultyLabel}</span>
+                  <span>
+                    {todayAttempt.correctCount}/5단계 · {todayAttempt.subject}
+                  </span>
+                </div>
                 <div className="split">
                   <button type="button" className="btn secondary" onClick={() => onResult(todayMission.date)}>
                     결과 보기
@@ -113,9 +95,12 @@ export function Home({
                 </div>
               </>
             ) : (
-              <button type="button" className="btn" onClick={() => onOpen(todayMission.date)}>
-                {running ? "이어서 풀기" : "오늘 미션 시작하기"}
-              </button>
+              <>
+                <p className="hero-facts">난이도 {difficultyText(todayMission.difficulty)} · {todayMission.difficultyLabel}</p>
+                <button type="button" className="btn" onClick={() => onOpen(todayMission.date)}>
+                  {running ? "이어서 풀기" : "오늘 미션 시작하기"}
+                </button>
+              </>
             )}
           </section>
         ) : (
@@ -144,15 +129,14 @@ export function Home({
               <span className="grow">
                 <span className="title">{group.title}</span>
                 <span className="sub">
-                  {monthSpan(group.items)} · {group.items.length}일
+                  {group.items.length}회 중 {finished}회 완료
                 </span>
-                <span className="sub">완료 {finished}일</span>
               </span>
               <svg className="chev" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
-            {open ? group.items.map((mission) => {
+            {open ? <div className="month-days">{group.items.map((mission) => {
               const attempt = attempts[mission.date];
               const status = cardStatus(mission.date, today, Boolean(attempt));
               const actionable = status === "done" || status === "open";
@@ -190,7 +174,7 @@ export function Home({
                   ) : null}
                 </button>
               );
-            }) : null}
+            })}</div> : null}
           </section>
           );
         })}
