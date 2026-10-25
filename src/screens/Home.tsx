@@ -53,7 +53,7 @@ export function Home({
       return;
     }
     if (status === "missed") {
-      onToast("이 미션은 자정에 종료됐어요");
+      onToast("이 날은 풀지 않아 결과지가 없어요");
       return;
     }
     if (status === "done") onResult(mission.date);
@@ -122,24 +122,39 @@ export function Home({
             {group.items.map((mission) => {
               const attempt = attempts[mission.date];
               const status = cardStatus(mission.date, today, Boolean(attempt));
+              const actionable = status === "done" || status === "open";
+              const detail =
+                status === "done"
+                  ? "결과 보기"
+                  : status === "open"
+                    ? "지금 풀 수 있어요"
+                    : status === "missed"
+                      ? "결과지 없음"
+                      : "0시에 열려요";
               return (
                 <button
                   key={mission.id}
                   id={`day-${mission.date}`}
                   type="button"
                   className={`row ${status}`}
+                  aria-label={`${mission.day}일 ${koreanDate(mission.date)} ${mission.subject}, ${detail}`}
                   onClick={() => openRow(mission)}
                 >
                   <span className="day">{mission.day}일</span>
                   <span className="grow">
                     <span className="title">{mission.subject}</span>
                     <span className="sub">
-                      {koreanDate(mission.date)} · 난이도 {difficultyText(mission.difficulty)}
+                      {detail} · 난이도 {difficultyText(mission.difficulty)}
                     </span>
                   </span>
-                  <span className={`badge ${status === "done" ? "green" : status === "open" ? "blue" : status === "missed" ? "red" : "grey"}`}>
-                    {status === "done" ? won(attempt.reward) : status === "open" ? "오늘" : status === "missed" ? "종료" : "예정"}
+                  <span className={`badge ${status === "done" ? "green" : status === "open" ? "solid" : "ghost"}`}>
+                    {status === "done" && attempt ? won(attempt.reward) : status === "open" ? "열림" : status === "missed" ? "미참여" : "잠김"}
                   </span>
+                  {actionable ? (
+                    <svg className="chev" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="m9 6 6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ) : null}
                 </button>
               );
             })}

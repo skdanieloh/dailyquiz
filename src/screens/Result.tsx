@@ -1,5 +1,6 @@
 import type { Attempt, Mission } from "../data/types";
 import { difficultyText, formatDuration, koreanDate, kstClock, won } from "../lib/format";
+import { kstDate } from "../lib/kst";
 import { rewardOf, STAGE_COUNT } from "../lib/reward";
 
 export function Result({
@@ -21,7 +22,7 @@ export function Result({
             <path d="M15 5 8 12l7 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        <h1>오늘의 결과</h1>
+        <h1>{attempt.date === kstDate() ? "오늘의 결과" : "지난 결과"}</h1>
         <span />
       </header>
       <div className="home-body">
