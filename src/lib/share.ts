@@ -1,5 +1,6 @@
 import type { Attempt } from "../data/types";
 import { difficultyText, formatDuration, koreanDate, kstClock, won } from "./format";
+import { shareImage } from "./shareCard";
 
 export function shareText(attempt: Attempt) {
   const stages = attempt.stages
@@ -26,14 +27,23 @@ export function shareText(attempt: Attempt) {
 
 export async function shareSummary(attempt: Attempt) {
   const text = shareText(attempt);
+  const blob = await shareImage(attempt);
+  const file = new File([blob], `dailyquiz-${attempt.date}.png`, { type: "image/png" });
   if (typeof navigator.share === "function") {
+    const withFile = { files: [file], title: "dailyquiz 결과", text };
+    const imageOnly = { files: [file], title: "dailyquiz 결과" };
     try {
-      await navigator.share({ title: "dailyquiz 결과", text });
-      return "shared" as const;
+      if (navigator.canShare?.(withFile)) {
+        await navigator.share(withFile);
+        return { kind: "shared" } as const;
+      }
+      if (navigator.canShare?.(imageOnly)) {
+        await navigator.share(imageOnly);
+        return { kind: "shared" } as const;
+      }
     } catch (error) {
-      if ((error as { name?: string }).name === "AbortError") return "aborted" as const;
+      if ((error as { name?: string }).name === "AbortError") return { kind: "aborted" } as const;
     }
   }
-  await navigator.clipboard.writeText(text);
-  return "copied" as const;
+  return { kind: "card", text, blob } as const;
 }

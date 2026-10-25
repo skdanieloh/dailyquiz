@@ -112,7 +112,23 @@ ul, ol { margin: 0; padding: 0; }
 
 .section-head, .section-label { display: flex; justify-content: space-between; align-items: baseline; margin: 22px 4px 10px; color: var(--muted); font-size: 13px; font-weight: 700; }
 .section-head h3, .section-label { font-size: 13px; }
-.month { position: sticky; top: 0; z-index: 1; background: var(--grey); padding: 12px 4px 8px; color: var(--muted); font-size: 13px; }
+.month-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 8px;
+  padding: 16px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--white);
+  text-align: left;
+}
+.month-toggle .title { display: block; font-size: 16px; font-weight: 800; }
+.month-toggle .sub { display: block; margin-top: 2px; color: var(--text); font-size: 13px; font-weight: 600; }
+.month-toggle .chev { flex: none; color: var(--ink); transition: transform 0.2s ease; }
+.month-toggle.open { margin-bottom: 10px; }
+.month-toggle.open .chev { transform: rotate(180deg); }
 
 .row {
   width: 100%;
@@ -234,6 +250,7 @@ ul, ol { margin: 0; padding: 0; }
 .overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.46); display: flex; align-items: flex-end; z-index: 20; }
 .sheet { width: min(480px, 100%); margin: 0 auto; background: #fff; border-radius: 20px 20px 0 0; padding: 28px 20px calc(20px + env(safe-area-inset-bottom)); }
 .sheet h2 { font-size: 22px; letter-spacing: -0.03em; margin-bottom: 8px; }
+.share-card { display: block; width: 100%; margin-top: 16px; border-radius: 16px; background: var(--grey); }
 .sheet textarea {
   width: 100%;
   min-height: 240px;

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useState } from "react";
 import { curriculum, missionByDate } from "../data/curriculum";
 import type { Attempt, Mission } from "../data/types";
 import { difficultyText, koreanDate, monthTitle, won } from "../lib/format";
@@ -11,6 +11,24 @@ for (const mission of curriculum.missions) {
   const last = groups[groups.length - 1];
   if (!last || last.title !== title) groups.push({ title, items: [mission] });
   else last.items.push(mission);
+}
+
+function monthDay(iso: string) {
+  const parts = new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
+    month: "numeric",
+    day: "numeric",
+  }).formatToParts(new Date(`${iso}T12:00:00+09:00`));
+  const pick = (type: Intl.DateTimeFormatPartTypes) => parts.find((part) => part.type === type)?.value ?? "";
+  return { month: Number(pick("month")), day: Number(pick("day")) };
+}
+
+function monthSpan(items: Mission[]) {
+  const first = monthDay(items[0].date);
+  const last = monthDay(items[items.length - 1].date);
+  const start = `${first.month}월 ${first.day}일`;
+  const end = first.month === last.month ? `${last.day}일` : `${last.month}월 ${last.day}일`;
+  return `${start}–${end}`;
 }
 
 export function Home({
@@ -40,11 +58,7 @@ export function Home({
   const todayAttempt = todayMission ? attempts[todayMission.date] : undefined;
   const running = todayMission ? loadRun(uid, todayMission.date) : null;
   const doneCount = curriculum.missions.filter((mission) => attempts[mission.date]).length;
-
-  useEffect(() => {
-    if (!todayMission || todayMission.day <= 3) return;
-    document.getElementById(`day-${todayMission.date}`)?.scrollIntoView({ block: "center" });
-  }, [todayMission]);
+  const [openMonths, setOpenMonths] = useState<Record<string, boolean>>({});
 
   function openRow(mission: Mission) {
     const status = cardStatus(mission.date, today, Boolean(attempts[mission.date]));
@@ -116,10 +130,29 @@ export function Home({
             {doneCount}/{curriculum.days}일 완료
           </span>
         </div>
-        {groups.map((group) => (
+        {groups.map((group) => {
+          const open = Boolean(openMonths[group.title]);
+          const finished = group.items.filter((mission) => attempts[mission.date]).length;
+          return (
           <section key={group.title}>
-            <h4 className="month">{group.title}</h4>
-            {group.items.map((mission) => {
+            <button
+              type="button"
+              className={`month-toggle ${open ? "open" : ""}`}
+              aria-expanded={open}
+              onClick={() => setOpenMonths((current) => ({ ...current, [group.title]: !current[group.title] }))}
+            >
+              <span className="grow">
+                <span className="title">{group.title}</span>
+                <span className="sub">
+                  {monthSpan(group.items)} · {group.items.length}일
+                </span>
+                <span className="sub">완료 {finished}일</span>
+              </span>
+              <svg className="chev" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+            {open ? group.items.map((mission) => {
               const attempt = attempts[mission.date];
               const status = cardStatus(mission.date, today, Boolean(attempt));
               const actionable = status === "done" || status === "open";
@@ -157,9 +190,10 @@ export function Home({
                   ) : null}
                 </button>
               );
-            })}
+            }) : null}
           </section>
-        ))}
+          );
+        })}
         <button type="button" className="text-btn" onClick={onSignOut}>
           로그아웃
         </button>

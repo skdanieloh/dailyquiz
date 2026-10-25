@@ -52,7 +52,7 @@ export default function App() {
   });
   const [route, setRoute] = useState<Route>({ name: "home" });
   const [toast, setToast] = useState<string | null>(null);
-  const [sheet, setSheet] = useState<string | null>(null);
+  const [sheet, setSheet] = useState<{ text: string; imageUrl: string } | null>(null);
   const toastTimer = useRef(0);
 
   useEffect(() => {
@@ -106,15 +106,24 @@ export default function App() {
     toastTimer.current = window.setTimeout(() => setToast(null), 2600);
   }
 
+  function closeSheet() {
+    setSheet((current) => {
+      if (current) URL.revokeObjectURL(current.imageUrl);
+      return null;
+    });
+  }
+
   async function share(attempt: Attempt) {
     try {
       const result = await shareSummary(attempt);
-      if (result === "copied") showToast("결과지를 복사했어요. 부모님께 붙여 넣어 보내 주세요.");
-      if (result === "shared" || result === "copied" || result === "aborted") return;
+      if (result.kind === "shared" || result.kind === "aborted") return;
+      setSheet((current) => {
+        if (current) URL.revokeObjectURL(current.imageUrl);
+        return { text: result.text, imageUrl: URL.createObjectURL(result.blob) };
+      });
     } catch {
-      // 공유 시트가 없으면 결과지 원문을 직접 보여 준다.
+      setSheet({ text: shareText(attempt), imageUrl: "" });
     }
-    setSheet(shareText(attempt));
   }
 
   async function save(attempt: Attempt) {
@@ -224,12 +233,13 @@ export default function App() {
       {screen}
       {toast ? <div className="toast">{toast}</div> : null}
       {sheet ? (
-        <div className="overlay" role="presentation" onClick={() => setSheet(null)}>
+        <div className="overlay" role="presentation" onClick={closeSheet}>
           <div className="sheet" role="dialog" aria-modal="true" aria-labelledby="share-title" onClick={(event) => event.stopPropagation()}>
-            <h2 id="share-title">결과지</h2>
-            <p className="lead">글을 길게 눌러 복사한 뒤 부모님께 보내 주세요.</p>
-            <textarea readOnly value={sheet} onFocus={(event) => event.currentTarget.select()} />
-            <button type="button" className="btn" onClick={() => setSheet(null)}>
+            <h2 id="share-title">결과 카드</h2>
+            <p className="lead">이미지를 길게 눌러 부모님께 보내 주세요.</p>
+            {sheet.imageUrl ? <img className="share-card" src={sheet.imageUrl} alt="점수, 일차, 보상금이 적힌 결과 카드" /> : null}
+            <textarea readOnly value={sheet.text} onFocus={(event) => event.currentTarget.select()} />
+            <button type="button" className="btn" onClick={closeSheet}>
               닫기
             </button>
           </div>
