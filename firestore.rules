@@ -1,0 +1,131 @@
+rules_version = '2';
+// expedition 프로젝트의 기존 수집 게시판 규칙에 하루 작업기억 규칙을 더한 파일입니다.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // 프로필: 누구나(로그인) 조회, 본인만 수정.
+    match /users/{userId} {
+      allow read: if signedIn();
+      allow create, update: if signedIn() && request.auth.uid == userId;
+      allow delete: if false;
+    }
+
+    // 게시글
+    match /posts/{postId} {
+      allow read: if signedIn();
+      // 생성: 작성자 본인으로만.
+      allow create: if signedIn()
+        && request.resource.data.authorId == request.auth.uid;
+      // 수정: 작성자 본인이거나, 좋아요/댓글 카운터만 변경하는 경우 허용.
+      allow update: if signedIn() && (
+        resource.data.authorId == request.auth.uid
+        || request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['likeCount', 'commentCount'])
+      );
+      allow delete: if signedIn() && resource.data.authorId == request.auth.uid;
+
+      // 원본 이미지(서브문서): 로그인 조회, 작성자 본인만 생성/수정/삭제.
+      match /media/{mediaId} {
+        allow read: if signedIn();
+        allow create, update: if signedIn()
+          && request.resource.data.authorId == request.auth.uid;
+        allow delete: if signedIn()
+          && resource.data.authorId == request.auth.uid;
+      }
+
+      // 좋아요: 본인 uid 문서만 생성/삭제.
+      match /likes/{uid} {
+        allow read: if signedIn();
+        allow create, delete: if signedIn() && request.auth.uid == uid;
+      }
+
+      // 댓글: 로그인 조회, 작성자 본인으로만 생성/수정/삭제.
+      match /comments/{commentId} {
+        allow read: if signedIn();
+        allow create: if signedIn()
+          && request.resource.data.authorId == request.auth.uid;
+        allow update: if signedIn()
+          && resource.data.authorId == request.auth.uid;
+        allow delete: if signedIn()
+          && resource.data.authorId == request.auth.uid;
+      }
+    }
+
+    function stageOk(stage) {
+      return stage.keys().hasOnly(['correct', 'summary'])
+        && stage.correct is bool
+        && stage.summary is string
+        && stage.summary.size() > 0
+        && stage.summary.size() < 180;
+    }
+
+    function correctTotal(stages) {
+      return (stages[0].correct ? 1 : 0)
+        + (stages[1].correct ? 1 : 0)
+        + (stages[2].correct ? 1 : 0)
+        + (stages[3].correct ? 1 : 0)
+        + (stages[4].correct ? 1 : 0);
+    }
+
+    match /dailyquiz/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow create, update: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['displayName', 'email', 'photoURL', 'updatedAt'])
+        && request.resource.data.displayName is string
+        && request.resource.data.email is string
+        && request.resource.data.photoURL is string
+        && request.resource.data.updatedAt is timestamp;
+      allow delete: if false;
+
+      match /attempts/{date} {
+        allow read: if signedIn() && request.auth.uid == uid;
+        allow create: if signedIn()
+          && request.auth.uid == uid
+          && request.resource.data.keys().hasOnly([
+            'date', 'missionId', 'type', 'phase', 'subject', 'title',
+            'difficulty', 'difficultyLabel', 'correctCount', 'maxStages',
+            'reward', 'startedAt', 'completedAt', 'durationMs', 'stages'
+          ])
+          && request.resource.data.date == date
+          && request.resource.data.date is string
+          && request.resource.data.missionId is string
+          && request.resource.data.missionId.size() < 20
+          && request.resource.data.type is string
+          && request.resource.data.type.size() < 40
+          && request.resource.data.phase is string
+          && request.resource.data.subject is string
+          && request.resource.data.title is string
+          && request.resource.data.difficulty is number
+          && request.resource.data.difficultyLabel is string
+          && request.resource.data.correctCount is int
+          && request.resource.data.correctCount >= 0
+          && request.resource.data.correctCount <= 5
+          && request.resource.data.maxStages == 5
+          && request.resource.data.reward is int
+          && request.resource.data.reward == 500 + request.resource.data.correctCount * 100
+          && request.resource.data.startedAt is timestamp
+          && request.resource.data.completedAt is timestamp
+          && request.resource.data.completedAt > request.time - duration.value(10, 'm')
+          && request.resource.data.completedAt < request.time + duration.value(2, 'm')
+          && request.resource.data.durationMs is int
+          && request.resource.data.durationMs == request.resource.data.completedAt.toMillis() - request.resource.data.startedAt.toMillis()
+          && request.resource.data.durationMs >= 0
+          && request.resource.data.durationMs < 43200000
+          && request.resource.data.stages is list
+          && request.resource.data.stages.size() == 5
+          && stageOk(request.resource.data.stages[0])
+          && stageOk(request.resource.data.stages[1])
+          && stageOk(request.resource.data.stages[2])
+          && stageOk(request.resource.data.stages[3])
+          && stageOk(request.resource.data.stages[4])
+          && request.resource.data.correctCount == correctTotal(request.resource.data.stages);
+        allow update, delete: if false;
+      }
+    }
+  }
+}
