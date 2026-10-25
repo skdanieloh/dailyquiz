@@ -148,16 +148,21 @@ export function Home({
                     : status === "missed"
                       ? "결과지 없음"
                       : "0시에 열려요";
+              const [, month, dayOfMonth] = mission.date.split("-");
+              const calendar = `${Number(month)}월 ${Number(dayOfMonth)}일`;
               return (
                 <button
                   key={mission.id}
                   id={`day-${mission.date}`}
                   type="button"
                   className={`row ${status}`}
-                  aria-label={`${mission.day}일 ${koreanDate(mission.date)} ${mission.subject}, ${detail}`}
+                  aria-label={`${calendar} ${mission.day}회차 ${koreanDate(mission.date)} ${mission.subject}, ${detail}`}
                   onClick={() => openRow(mission)}
                 >
-                  <span className="day">{mission.day}일</span>
+                  <span className="when">
+                    <span className="cal">{calendar}</span>
+                    <span className="round">{mission.day}회차</span>
+                  </span>
                   <span className="grow">
                     <span className="title">{mission.subject}</span>
                     <span className="sub">

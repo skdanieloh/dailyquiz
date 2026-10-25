@@ -139,6 +139,7 @@ ul, ol { margin: 0; padding: 0; }
   border-left: 2px solid #d1d6db;
 }
 .month-days .row { border-radius: 14px; }
+.month-days .row .sub { white-space: normal; }
 
 .row {
   width: 100%;
@@ -152,7 +153,9 @@ ul, ol { margin: 0; padding: 0; }
   margin-bottom: 8px;
   text-align: left;
 }
-.row .day { width: 42px; color: var(--muted); font-size: 13px; font-weight: 800; flex: none; }
+.row .when { display: flex; flex-direction: column; gap: 1px; flex: none; }
+.row .cal { color: var(--ink); font-size: 14px; font-weight: 800; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.row .round { color: var(--muted); font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .row .grow { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .row .title { font-size: 16px; font-weight: 700; }
 .row .sub { display: block; margin-top: 2px; color: var(--text); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -161,18 +164,21 @@ ul, ol { margin: 0; padding: 0; }
   background: var(--blue-soft);
   box-shadow: inset 0 0 0 2px var(--blue);
 }
-.row.open .day,
+.row.open .cal,
+.row.open .round,
 .row.open .title,
 .row.open .sub { color: var(--blue-press); }
 .row.done { background: var(--white); box-shadow: inset 0 0 0 1px var(--line); }
-.row.done .day { color: var(--green); }
+.row.done .cal { color: var(--green); }
 .row.locked,
 .row.missed {
   background: transparent;
   box-shadow: none;
 }
-.row.locked .day,
-.row.missed .day,
+.row.locked .cal,
+.row.missed .cal,
+.row.locked .round,
+.row.missed .round,
 .row.locked .title,
 .row.missed .title { color: #b0b8c1; font-weight: 600; }
 .row.locked .sub,
